@@ -9,7 +9,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [nameFilter, setNameFilter] = useState('')
-  
+
   useEffect(() => {
     personService
       .getAll()
@@ -24,26 +24,39 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
     if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return
-    }
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const person = persons.find(person => person.name === newName)
+        const changedPerson = {...person, number: newPhone}
+        personService
+          .update(person.id, changedPerson)
+          .then(updatedPerson => {
+            // Update state with updated person, keep all other entries the same
+            setPersons(persons.map(person => person.id === updatedPerson.id ? updatedPerson : person))
+            setNewName('')
+            setNewPhone('')
+          })
+          .catch(error => {
+            alert('failed to update person', error)
+          })
+      }
+    } else {
+      const person = {
+        name : newName,
+        number : newPhone
+      }
 
-    const person = {
-      name : newName,
-      number : newPhone
+      personService
+        .create(person)
+        .then(personResponse => {
+          console.log(personResponse)
+          setPersons(persons.concat(personResponse))
+          setNewName('')
+          setNewPhone('')
+        })
+        .catch(error => {
+          alert('failed to create person', error)
+        })
     }
-
-    personService
-      .create(person)
-      .then(personResponse => {
-        console.log(personResponse)
-        setPersons(persons.concat(personResponse))
-        setNewName('')
-        setNewPhone('')
-      })
-      .catch(error => {
-        alert('failed to create person', error)
-      })
   }
 
   const deletePerson = (personToDelete) => {
