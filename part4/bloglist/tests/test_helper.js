@@ -2,14 +2,12 @@ const blog = require('../models/blog')
 
 const initialBlogs = [
   {
-    id: '1',
     title: 'First',
     author: 'First',
     url: 'url',
     likes: 4,
   },
   {
-    id: '2',
     title: 'Second',
     author: 'Second',
     url: 'url',
@@ -18,7 +16,6 @@ const initialBlogs = [
 ]
 
 const blogToAdd = {
-  id: '3',
   title: 'Third',
   author: 'Third',
   url: 'url',
