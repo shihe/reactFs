@@ -1,29 +1,31 @@
 {
-  "name": "reactfsnode",
+  "name": "reactfs",
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "test": "cross-env  NODE_ENV=test node --test",
+    "test": "cross-env NODE_ENV=test node --test --test-concurrency=1",
     "lint": "eslint ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shihe/reactFsNode.git"
+    "url": "git+https://github.com/shihe/reactFs.git"
   },
   "author": "Eric",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shihe/reactFsNode/issues"
+    "url": "https://github.com/shihe/reactFs/issues"
   },
-  "homepage": "https://github.com/shihe/reactFsNode#readme",
+  "homepage": "https://github.com/shihe/reactFs#readme",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
     "morgan": "^1.10.0"
   },

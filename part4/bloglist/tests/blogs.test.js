@@ -1,18 +1,45 @@
-const { test, after, describe, beforeEach } = require('node:test')
+const { test, after, describe, beforeEach, before } = require('node:test')
 const assert = require('node:assert')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
 const supertest = require('supertest')
 const helper = require('./test_helper')
+const jwt = require('jsonwebtoken')
+const config = require('../utils/config')
 const app = require('../app')
 
 const api = supertest(app)
 
 describe('With initialBlogs saved', () => {
+  before(async () => {
+    await User.deleteMany({})
+    // Create user
+    const passwordHash = await bcrypt.hash('pass', 10)
+    const user = new User({ username: 'user', passwordHash })
+
+    const createdUser = await user.save()
+
+    this.id = createdUser.id
+    // Generate token with created id
+    this.token = jwt.sign(
+      {
+        username: 'user',
+        id: this.id,
+      },
+      config.SECRET
+    )
+  })
+
   beforeEach(async () => {
     await Blog.deleteMany({})
 
-    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
+    const blogObjects = helper.initialBlogs.map(blog => {
+      blog.user = this.id
+      return new Blog(blog)
+    })
+
     const promises = blogObjects.map(blog => blog.save())
     await Promise.all(promises)
   })
@@ -21,6 +48,7 @@ describe('With initialBlogs saved', () => {
     test('returns initialBlogs.length', async () => {
       const response = await api
         .get('/api/blogs')
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(200)
         .expect('Content-Type', /application\/json/)
 
@@ -29,10 +57,11 @@ describe('With initialBlogs saved', () => {
   })
 
   describe('Adding a blog', () => {
-    test('adding a blog returns a larger blogList containing it', async () => {
+    test('returns a larger blogList containing it', async () => {
       await api
         .post('/api/blogs')
         .send(helper.blogToAdd)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(201)
 
       const blogsInDb = await helper.blogsInDb()
@@ -48,6 +77,7 @@ describe('With initialBlogs saved', () => {
       await api
         .post('/api/blogs')
         .send(blogToAddWithoutLikes)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(201)
 
       const blogsInDb = await helper.blogsInDb()
@@ -63,6 +93,7 @@ describe('With initialBlogs saved', () => {
       await api
         .post('/api/blogs')
         .send(blogToAddWithoutTitle)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(400)
 
       const blogsInDb = await helper.blogsInDb()
@@ -76,11 +107,19 @@ describe('With initialBlogs saved', () => {
       await api
         .post('/api/blogs')
         .send(blogToAddWithoutUrl)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(400)
 
       const blogsInDb = await helper.blogsInDb()
 
       assert.strictEqual(blogsInDb.length, helper.initialBlogs.length)
+    })
+
+    test('without token fails and returns 401', async () => {
+      await api
+        .post('/api/blogs')
+        .send(helper.blogToAdd)
+        .expect(401)
     })
   })
 
@@ -92,6 +131,7 @@ describe('With initialBlogs saved', () => {
       console.log(idToDelete)
       await api
         .delete(`/api/blogs/${idToDelete}`)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(204)
 
       const blogsInDb = await helper.blogsInDb()
@@ -112,6 +152,7 @@ describe('With initialBlogs saved', () => {
       const updatedBlog = await api
         .put(`/api/blogs/${idToUpdate}`)
         .send(updatingLikes)
+        .set({ Authorization: `Bearer ${this.token}` })
         .expect(200)
 
       assert.strictEqual(updatedBlog.body.likes, updatingLikes.likes)
