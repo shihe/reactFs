@@ -22,7 +22,7 @@ const BlogForm = ({
         <input
           type="text"
           value={title}
-          name="Title"
+          aria-label="title"
           onChange={event => setTitle(event.target.value)}
         />
       </div>
@@ -31,7 +31,7 @@ const BlogForm = ({
         <input
           type="text"
           value={author}
-          name="Author"
+          aria-label="author"
           onChange={event => setAuthor(event.target.value)}
         />
       </div>
@@ -40,7 +40,7 @@ const BlogForm = ({
         <input
           type="text"
           value={url}
-          name="Url"
+          aria-label="url"
           onChange={event => setUrl(event.target.value)}
         />
       </div>

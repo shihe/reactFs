@@ -30,12 +30,12 @@ const Blog = ({ blog, addLike, deleteBlog }) => {
 
   return (
     <div className="blog">
-      <div style={hideDetails}>
-        <p>
+      <div style={hideDetails} aria-label="hide-details">
+        <div>
           {blog.title} {blog.author} <button onClick={toggleShowDetails}>view</button>
-        </p>
+        </div>
       </div>
-      <div style={showWithDetails}>
+      <div style={showWithDetails} aria-label="show-details">
         <div>
           {blog.title} {blog.author} <button onClick={toggleShowDetails}>hide</button>
         </div>
