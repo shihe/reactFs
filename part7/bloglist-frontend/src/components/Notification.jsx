@@ -1,11 +1,9 @@
-const Notification = ({ message, className }) => {
-  if (message === null) {
-    return null
-  }
+import { Alert } from 'react-bootstrap'
 
+const Notification = ({ message, variant }) => {
   return (
-    <div className={className}>
-      {message}
+    <div className="container">
+      {message && <Alert variant={variant}>{message}</Alert>}
     </div>
   )
 }

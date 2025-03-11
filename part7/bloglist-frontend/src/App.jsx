@@ -1,24 +1,23 @@
-import { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
+import { useState, useEffect } from 'react'
+import { Route, Routes, useNavigate } from 'react-router-dom'
+
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/LoginForm'
-import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import Menu from './components/Menu'
+import BlogList from './components/BlogList'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
-
-  const blogFormRef = useRef()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
+    blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
   useEffect(() => {
@@ -34,12 +33,11 @@ const App = () => {
     try {
       const user = await loginService.login(loginObject)
 
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
 
       blogService.setToken(user.token)
       setUser(user)
+      navigate('/')
     } catch (e) {
       setErrorMessage('wrong username or password')
       setTimeout(() => {
@@ -56,14 +54,16 @@ const App = () => {
 
   const addBlog = async (blogObject) => {
     try {
-      blogFormRef.current.toggleVisibility()
       const addedBlog = await blogService.create(blogObject)
       const blogs = await blogService.getAll()
       setBlogs(blogs)
-      setSuccessMessage(`a new blog ${addedBlog.title} by ${addedBlog.author} added`)
+      setSuccessMessage(
+        `a new blog ${addedBlog.title} by ${addedBlog.author} added`
+      )
       setTimeout(() => {
         setSuccessMessage(null)
       }, 5000)
+      navigate('/')
     } catch (e) {
       setErrorMessage('Add blog failed')
       setTimeout(() => {
@@ -98,38 +98,21 @@ const App = () => {
     }
   }
 
-  const loginForm = () => (
-    <Togglable buttonLabel='login'>
-      <LoginForm createLogin={login} />
-    </Togglable>
-  )
-
-  const blogForm = () => (
-    <Togglable buttonLabel="new blog" ref={blogFormRef}>
-      <BlogForm createBlog={addBlog} />
-    </Togglable>
-  )
-
   return (
-    <div>
-      <h2>Blogs</h2>
-
-      <Notification message={errorMessage} className={"error"} />
-      <Notification message={successMessage} className={"success"} />
-
-      {user === null ?
-        loginForm() :
-        <div>
-          <p>
-            {user.name} logged-in <button type="submit" onClick={handleLogout}>logout</button>
-          </p>
-          {blogForm()}
-        </div>
-      }
-
-      {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-        <Blog key={blog.id} blog={blog} addLike={addLike} deleteBlog={deleteBlog} />
-      )}
+    <div className="container">
+      <Menu user={user} handleLogout={handleLogout} />
+      <Notification message={errorMessage} variant={'danger'} />
+      <Notification message={successMessage} variant={'success'} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <BlogList blogs={blogs} addLike={addLike} deleteBlog={deleteBlog} />
+          }
+        />
+        <Route path="/create" element={<BlogForm createBlog={addBlog} />} />
+        <Route path="/login" element={<LoginForm createLogin={login} />} />
+      </Routes>
     </div>
   )
 }

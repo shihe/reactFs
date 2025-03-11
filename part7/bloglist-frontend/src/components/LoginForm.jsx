@@ -1,8 +1,7 @@
 import { useState } from 'react'
+import { Form, Button } from 'react-bootstrap'
 
-const LoginForm = ({
-  createLogin
-}) => {
+const LoginForm = ({ createLogin }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -15,26 +14,27 @@ const LoginForm = ({
 
   return (
     <div>
-      <h2>Login</h2>
-
-      <form onSubmit={handleLogin}>
-        <div>
-          username
-          <input
-            value={username}
-            onChange={event => setUsername(event.target.value)}
+      <h2>login</h2>
+      <Form onSubmit={handleLogin}>
+        <Form.Group>
+          <Form.Label>username:</Form.Label>
+          <Form.Control
+            type="text"
+            name="username"
+            onChange={(event) => setUsername(event.target.value)}
           />
-        </div>
-        <div>
-          password
-          <input
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>password:</Form.Label>
+          <Form.Control
             type="password"
-            value={password}
-            onChange={event => setPassword(event.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
           />
-      </div>
-        <button type="submit">login</button>
-      </form>
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          login
+        </Button>
+      </Form>
     </div>
   )
 }

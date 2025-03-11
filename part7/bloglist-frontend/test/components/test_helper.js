@@ -4,7 +4,7 @@ const testBlog = {
   author: 'Test author',
   url: 'http://test.com',
   likes: 0,
-  user: "name"
+  user: 'name',
 }
 
 export { testBlog }

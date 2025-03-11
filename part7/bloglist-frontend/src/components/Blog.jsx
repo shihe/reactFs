@@ -17,7 +17,7 @@ const Blog = ({ blog, addLike, deleteBlog }) => {
       author: blog.author,
       url: blog.url,
       likes: blog.likes + 1,
-      user: blog.user?.name
+      user: blog.user?.name,
     })
   }
 
@@ -29,24 +29,32 @@ const Blog = ({ blog, addLike, deleteBlog }) => {
   }
 
   return (
-    <div className="blog">
-      <div style={hideDetails} aria-label="hide-details">
-        <div>
-          {blog.title} {blog.author} <button onClick={toggleShowDetails}>view</button>
+    <tr key={blog.id}>
+      <td>
+        <div className="blog">
+          <div style={hideDetails} aria-label="hide-details">
+            <div>
+              {blog.title} {blog.author}{' '}
+              <button onClick={toggleShowDetails}>view</button>
+            </div>
+          </div>
+          <div style={showWithDetails} aria-label="show-details">
+            <div>
+              {blog.title} {blog.author}{' '}
+              <button onClick={toggleShowDetails}>hide</button>
+            </div>
+            <div>{blog.url}</div>
+            <div>
+              {blog.likes} <button onClick={handleLike}>like</button>
+            </div>
+            <div>{blog.user?.name}</div>
+            <div>
+              <button onClick={removeBlog}>remove</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div style={showWithDetails} aria-label="show-details">
-        <div>
-          {blog.title} {blog.author} <button onClick={toggleShowDetails}>hide</button>
-        </div>
-        <div>{blog.url}</div>
-        <div>
-          {blog.likes} <button onClick={handleLike}>like</button>
-        </div>
-        <div>{blog.user?.name}</div>
-        <div><button onClick={removeBlog}>remove</button></div>
-      </div>
-    </div>
+      </td>
+    </tr>
   )
 }
 

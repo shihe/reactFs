@@ -9,9 +9,9 @@ describe('<BlogForm />', () => {
     const user = userEvent.setup()
     render(<BlogForm createBlog={createBlog} />)
 
-    const titleInput = screen.getByRole('textbox', { name : "title" })
-    const authorInput = screen.getByRole('textbox', { name : "author" })
-    const urlInput = screen.getByRole('textbox', { name : "url" })
+    const titleInput = screen.getByRole('textbox', { name: 'title' })
+    const authorInput = screen.getByRole('textbox', { name: 'author' })
+    const urlInput = screen.getByRole('textbox', { name: 'url' })
     const createButton = screen.getByText('create')
 
     await user.type(titleInput, testBlog.title)
