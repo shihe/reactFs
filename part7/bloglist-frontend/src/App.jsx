@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
 import Notification from './components/Notification'
 import blogService from './services/blogs'
@@ -8,13 +9,14 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Menu from './components/Menu'
 import BlogList from './components/BlogList'
+import { sendSuccess, sendError } from './reducers/notificationReducer'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [successMessage, setSuccessMessage] = useState(null)
+  const notification = useSelector((state) => state.notification)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -39,10 +41,7 @@ const App = () => {
       setUser(user)
       navigate('/')
     } catch (e) {
-      setErrorMessage('wrong username or password')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(sendError('wrong username or password', 5))
     }
   }
 
@@ -57,18 +56,15 @@ const App = () => {
       const addedBlog = await blogService.create(blogObject)
       const blogs = await blogService.getAll()
       setBlogs(blogs)
-      setSuccessMessage(
-        `a new blog ${addedBlog.title} by ${addedBlog.author} added`
+      dispatch(
+        sendSuccess(
+          `a new blog ${addedBlog.title} by ${addedBlog.author} added`,
+          5
+        )
       )
-      setTimeout(() => {
-        setSuccessMessage(null)
-      }, 5000)
       navigate('/')
     } catch (e) {
-      setErrorMessage('Add blog failed')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(sendError('Add blog failed', 5))
     }
   }
 
@@ -78,10 +74,7 @@ const App = () => {
       const blogs = await blogService.getAll()
       setBlogs(blogs)
     } catch (e) {
-      setErrorMessage('Add like failed')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(sendError('Add like failed', 5))
     }
   }
 
@@ -91,18 +84,17 @@ const App = () => {
       const blogs = await blogService.getAll()
       setBlogs(blogs)
     } catch (e) {
-      setErrorMessage('Delete blog failed')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      dispatch(sendError('Delete blog failed', 5))
     }
   }
 
   return (
     <div className="container">
       <Menu user={user} handleLogout={handleLogout} />
-      <Notification message={errorMessage} variant={'danger'} />
-      <Notification message={successMessage} variant={'success'} />
+      <Notification
+        message={notification.message}
+        variant={notification.variant}
+      />
       <Routes>
         <Route
           path="/"
