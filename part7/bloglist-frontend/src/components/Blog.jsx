@@ -12,7 +12,8 @@ const Blog = ({ blog, addLike, deleteBlog }) => {
 
   const handleLike = (event) => {
     event.preventDefault()
-    addLike(blog.id, {
+    addLike({
+      id: blog.id,
       title: blog.title,
       author: blog.author,
       url: blog.url,

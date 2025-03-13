@@ -20,7 +20,7 @@ const BlogForm = ({ createBlog }) => {
         <Form.Label>title:</Form.Label>
         <Form.Control
           type="text"
-          name="title"
+          aria-label="title"
           onChange={(event) => setTitle(event.target.value)}
         />
       </Form.Group>
@@ -28,7 +28,7 @@ const BlogForm = ({ createBlog }) => {
         <Form.Label>author:</Form.Label>
         <Form.Control
           type="text"
-          name="author"
+          aria-label="author"
           onChange={(event) => setAuthor(event.target.value)}
         />
       </Form.Group>
@@ -36,7 +36,7 @@ const BlogForm = ({ createBlog }) => {
         <Form.Label>url:</Form.Label>
         <Form.Control
           type="text"
-          name="url"
+          aria-label="url"
           onChange={(event) => setUrl(event.target.value)}
         />
       </Form.Group>

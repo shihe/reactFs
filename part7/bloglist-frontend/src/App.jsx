@@ -1,64 +1,55 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Notification from './components/Notification'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Menu from './components/Menu'
 import BlogList from './components/BlogList'
-import { sendSuccess, sendError } from './reducers/notificationReducer'
+import { sendError, sendSuccess } from './reducers/notificationReducer'
+import {
+  addBlog,
+  addLike,
+  deleteBlog,
+  getBloglist,
+} from './reducers/blogReducer'
+import { login, logout, setUser } from './reducers/userReducer'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
+  const blogs = useSelector((state) => state.blogs)
+  const user = useSelector((state) => state.user)
   const notification = useSelector((state) => state.notification)
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    dispatch(getBloglist())
   }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+      dispatch(setUser(user))
     }
   }, [])
 
-  const login = async (loginObject) => {
+  const createLogin = (loginObject) => {
     try {
-      const user = await loginService.login(loginObject)
-
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-
-      blogService.setToken(user.token)
-      setUser(user)
+      dispatch(login(loginObject))
       navigate('/')
     } catch (e) {
       dispatch(sendError('wrong username or password', 5))
     }
   }
 
-  const handleLogout = async (event) => {
-    event.preventDefault()
-    window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
-  }
-
-  const addBlog = async (blogObject) => {
+  const createBlog = (blogObject) => {
     try {
-      const addedBlog = await blogService.create(blogObject)
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      dispatch(addBlog(blogObject, user.token))
       dispatch(
         sendSuccess(
-          `a new blog ${addedBlog.title} by ${addedBlog.author} added`,
+          `a new blog ${blogObject.title} by ${blogObject.author} added`,
           5
         )
       )
@@ -68,24 +59,26 @@ const App = () => {
     }
   }
 
-  const addLike = async (id, blogObject) => {
+  const handleLike = (blogObject) => {
     try {
-      await blogService.update(id, blogObject)
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      dispatch(addLike(blogObject))
     } catch (e) {
       dispatch(sendError('Add like failed', 5))
     }
   }
 
-  const deleteBlog = async (id) => {
+  const handleDeleteBlog = (id) => {
     try {
-      await blogService.remove(id)
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      dispatch(deleteBlog(id, user.token))
     } catch (e) {
       dispatch(sendError('Delete blog failed', 5))
     }
+  }
+
+  const handleLogout = (event) => {
+    event.preventDefault()
+    dispatch(logout())
+    navigate('/login')
   }
 
   return (
@@ -99,11 +92,18 @@ const App = () => {
         <Route
           path="/"
           element={
-            <BlogList blogs={blogs} addLike={addLike} deleteBlog={deleteBlog} />
+            <BlogList
+              blogs={blogs}
+              addLike={handleLike}
+              deleteBlog={handleDeleteBlog}
+            />
           }
         />
-        <Route path="/create" element={<BlogForm createBlog={addBlog} />} />
-        <Route path="/login" element={<LoginForm createLogin={login} />} />
+        <Route path="/create" element={<BlogForm createBlog={createBlog} />} />
+        <Route
+          path="/login"
+          element={<LoginForm createLogin={createLogin} />}
+        />
       </Routes>
     </div>
   )

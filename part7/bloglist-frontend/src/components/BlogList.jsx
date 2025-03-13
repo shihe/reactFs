@@ -7,6 +7,7 @@ const BlogList = ({ blogs, addLike, deleteBlog }) => (
     <Table striped>
       <tbody>
         {blogs
+          .slice()
           .sort((a, b) => b.likes - a.likes)
           .map((blog) => (
             <Blog
