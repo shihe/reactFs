@@ -1,24 +1,19 @@
 import { useState } from 'react'
+import { Button, Col, Form, Row } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 
-const Blog = ({ blog, addLike, deleteBlog }) => {
-  const [showDetails, setShowDetails] = useState(false)
+const Blog = ({ blog, addComment, addLike, deleteBlog }) => {
+  const [comment, setComment] = useState([])
 
-  const hideDetails = { display: showDetails ? 'none' : '' }
-  const showWithDetails = { display: showDetails ? '' : 'none' }
-
-  const toggleShowDetails = () => {
-    setShowDetails(!showDetails)
+  if (!blog) {
+    return null
   }
 
   const handleLike = (event) => {
     event.preventDefault()
     addLike({
-      id: blog.id,
-      title: blog.title,
-      author: blog.author,
-      url: blog.url,
+      ...blog,
       likes: blog.likes + 1,
-      user: blog.user?.name,
     })
   }
 
@@ -29,33 +24,53 @@ const Blog = ({ blog, addLike, deleteBlog }) => {
     }
   }
 
+  const handleComment = (event) => {
+    event.preventDefault()
+    const appendedComments = blog.comments
+      ? [...blog.comments, comment]
+      : [comment]
+    addComment({
+      ...blog,
+      comments: appendedComments,
+    })
+  }
+
   return (
-    <tr key={blog.id}>
-      <td>
-        <div className="blog">
-          <div style={hideDetails} aria-label="hide-details">
-            <div>
-              {blog.title} {blog.author}{' '}
-              <button onClick={toggleShowDetails}>view</button>
-            </div>
-          </div>
-          <div style={showWithDetails} aria-label="show-details">
-            <div>
-              {blog.title} {blog.author}{' '}
-              <button onClick={toggleShowDetails}>hide</button>
-            </div>
-            <div>{blog.url}</div>
-            <div>
-              {blog.likes} <button onClick={handleLike}>like</button>
-            </div>
-            <div>{blog.user?.name}</div>
-            <div>
-              <button onClick={removeBlog}>remove</button>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>
+    <div className="container">
+      <h2>
+        {blog.title} {blog.author}
+      </h2>
+      <div>
+        <Link to={`${blog.url}`}>{blog.url}</Link>
+      </div>
+      <div>
+        {blog.likes} likes <button onClick={handleLike}>like</button>
+      </div>
+      {blog.user?.name && <div>added by {blog.user?.name}</div>}
+      <div>
+        <button onClick={removeBlog}>remove</button>
+      </div>
+      <h4>comments</h4>
+      <Form onSubmit={handleComment}>
+        <Form.Group as={Row}>
+          <Col sm={10}>
+            <Form.Control
+              type="text"
+              aria-label="comment"
+              onChange={(event) => setComment(event.target.value)}
+            />
+          </Col>
+          <Col sm={2}>
+            <Button variant="primary" type="submit">
+              add comment
+            </Button>
+          </Col>
+        </Form.Group>
+      </Form>
+      <ul>
+        {blog.comments && blog.comments.map((comment) => <li>{comment}</li>)}
+      </ul>
+    </div>
   )
 }
 

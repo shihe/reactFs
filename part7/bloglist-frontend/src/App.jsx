@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { Route, Routes, useMatch, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Notification from './components/Notification'
@@ -11,10 +11,14 @@ import { sendError, sendSuccess } from './reducers/notificationReducer'
 import {
   addBlog,
   addLike,
+  appendComment,
   deleteBlog,
   getBloglist,
 } from './reducers/blogReducer'
 import { login, logout, setUser } from './reducers/userReducer'
+import UserList from './components/UserList'
+import UserDetails from './components/UserDetails'
+import Blog from './components/Blog'
 
 const App = () => {
   const blogs = useSelector((state) => state.blogs)
@@ -59,6 +63,10 @@ const App = () => {
     }
   }
 
+  const handleComment = (blogObject) => {
+    dispatch(appendComment(blogObject))
+  }
+
   const handleLike = (blogObject) => {
     try {
       dispatch(addLike(blogObject))
@@ -70,6 +78,7 @@ const App = () => {
   const handleDeleteBlog = (id) => {
     try {
       dispatch(deleteBlog(id, user.token))
+      navigate('/')
     } catch (e) {
       dispatch(sendError('Delete blog failed', 5))
     }
@@ -81,6 +90,16 @@ const App = () => {
     navigate('/login')
   }
 
+  const blogMatch = useMatch('/blogs/:id')
+  const blog = blogMatch
+    ? blogs.find((blog) => blog.id === blogMatch.params.id)
+    : null
+
+  const userMatch = useMatch('/users/:id')
+  const userBlogs = userMatch
+    ? blogs.filter((blog) => blog.user.id === userMatch.params.id)
+    : null
+
   return (
     <div className="container">
       <Menu user={user} handleLogout={handleLogout} />
@@ -89,11 +108,13 @@ const App = () => {
         variant={notification.variant}
       />
       <Routes>
+        <Route path="/" element={<BlogList blogs={blogs} />} />
         <Route
-          path="/"
+          path="/blogs/:id"
           element={
-            <BlogList
-              blogs={blogs}
+            <Blog
+              blog={blog}
+              addComment={handleComment}
               addLike={handleLike}
               deleteBlog={handleDeleteBlog}
             />
@@ -103,6 +124,11 @@ const App = () => {
         <Route
           path="/login"
           element={<LoginForm createLogin={createLogin} />}
+        />
+        <Route path="/users" element={<UserList blogs={blogs} />} />
+        <Route
+          path="/users/:id"
+          element={<UserDetails userBlogs={userBlogs} />}
         />
       </Routes>
     </div>

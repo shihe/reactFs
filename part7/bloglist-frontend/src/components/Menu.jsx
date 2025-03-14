@@ -22,6 +22,11 @@ const Menu = ({ user, handleLogout }) => {
             </Link>
           </Nav.Link>
           <Nav.Link href="#" as="span">
+            <Link style={padding} to="/users">
+              users
+            </Link>
+          </Nav.Link>
+          <Nav.Link href="#" as="span">
             {user === null ? (
               <Link style={padding} to="/login">
                 login

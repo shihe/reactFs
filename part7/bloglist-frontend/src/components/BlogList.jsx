@@ -1,7 +1,7 @@
 import { Table } from 'react-bootstrap'
-import Blog from './Blog'
+import { Link } from 'react-router-dom'
 
-const BlogList = ({ blogs, addLike, deleteBlog }) => (
+const BlogList = ({ blogs }) => (
   <>
     <h2>Blogs</h2>
     <Table striped>
@@ -10,12 +10,13 @@ const BlogList = ({ blogs, addLike, deleteBlog }) => (
           .slice()
           .sort((a, b) => b.likes - a.likes)
           .map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              addLike={addLike}
-              deleteBlog={deleteBlog}
-            />
+            <tr key={blog.id}>
+              <td>
+                <Link to={`/blogs/${blog.id}`}>
+                  {blog.title} {blog.author}
+                </Link>
+              </td>
+            </tr>
           ))}
       </tbody>
     </Table>
