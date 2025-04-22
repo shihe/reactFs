@@ -136,12 +136,17 @@ const typeDefs = `
 
   input AuthorInput {
     name: String!
+    born: Int
+  }
+
+  input EditAuthorInput {
+    name: String!
     setBornTo: Int!
   }
 
   type Mutation {
     addBook(book: BookInput!): Book
-    editAuthor(author: AuthorInput!): Author
+    editAuthor(author: EditAuthorInput!): Author
   }
 `
 
@@ -167,7 +172,7 @@ const resolvers = {
       console.log(args.book)
       const book = { ...args.book, author: args.book.author.name, id: uuid() }
       books = books.concat(book)
-      if (!authors.some(a => a.name === args.book.author)) {
+      if (!authors.some(a => a.name === args.book.author.name)) {
         const author = { ...args.book.author, id: uuid() }
         authors = authors.concat(author)
       }
